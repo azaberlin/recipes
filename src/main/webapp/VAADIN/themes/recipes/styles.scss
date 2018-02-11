@@ -1,0 +1,10 @@
+@import "variables";
+
+.recipes {
+	@include valo;
+
+	.v-button-light {
+		color : #ccc;
+	}
+
+}
