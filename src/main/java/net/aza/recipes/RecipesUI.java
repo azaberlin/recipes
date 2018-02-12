@@ -78,30 +78,7 @@ public class RecipesUI extends UI {
 	}
 
 	private Component createShowRecipeContent(final Recipe recipe) {
-		VerticalLayout detailContainer = new VerticalLayout();
-
-		detailContainer.addComponent(new Label(
-				"Mengenangaben für <b>" + recipe.getServingSize() + " " + recipe.getServingSizeType().getDisplayName(),
-				ContentMode.HTML));
-
-		recipe.getParts().forEach(p -> {
-			if (p.getName() != null && !p.getName().isEmpty()) {
-				Label partTitle = new Label(p.getName());
-				partTitle.addStyleName(ValoTheme.LABEL_H3);
-				detailContainer.addComponent(partTitle);
-			}
-
-			p.getIngredients().forEach(i -> {
-				detailContainer
-						.addComponent(new Label("<b>" + i.getAmount() + "</b> " + i.getUnit(), ContentMode.HTML));
-			});
-
-			Label instructions = new Label(p.getInstructions());
-			instructions.setWidth(50, Unit.PERCENTAGE);
-			detailContainer.addComponent(instructions);
-		});
-
-		return detailContainer;
+		return new RecipeDetailsPage(recipe);
 	}
 
 	private Component createRecipeNotFoundInfo() {
@@ -118,7 +95,7 @@ public class RecipesUI extends UI {
 	}
 
 	private Label createTitle() {
-		Label title = new Label(VaadinIcons.CUTLERY.getHtml() + " Mein Rezeptbuch", ContentMode.HTML);
+		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + " Mein Rezeptbuch", ContentMode.HTML);
 		title.addStyleName(ValoTheme.LABEL_H1);
 		title.addStyleName(ValoTheme.LABEL_COLORED);
 		return title;

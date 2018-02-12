@@ -3,8 +3,9 @@ $r-base-color: hsl($r-base-color-hue, 50%, 30%);
 $v-background-color: hsl($r-base-color-hue, 0%, 100%);
 $v-selection-color: hsl($r-base-color-hue, 50%, 40%);
 
-$v-border-radius: 30px;
-$v-focus-style: 0 0 0 1px rgba($v-focus-color, .5);
+$v-border-radius: 0px;
+/* $v-focus-style: 0 0 0 1px rgba($v-focus-color, .5); */
+$v-focus-style: none;
 
 
 @import "../valo/valo";

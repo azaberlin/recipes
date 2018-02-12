@@ -1,9 +1,16 @@
 package net.aza.recipes.model;
 
-import javax.persistence.*;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * A simple recipe. Each recipe consists of one or multiple recipe parts which contains the ingredients.
@@ -29,13 +36,14 @@ public class Recipe extends StorageEntity {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "recipe")
 	private List<RecipePart> parts;
 
-	public Recipe(String name, int servingSize, ServingSizeType servingSizeType) {
+	public Recipe(final String name, final int servingSize, final ServingSizeType servingSizeType) {
 		this.name = name;
 		this.servingSize = servingSize;
 		this.servingSizeType = servingSizeType;
 	}
 
-	public Recipe(String name, String description, int servingSize, ServingSizeType servingSizeType) {
+	public Recipe(final String name, final String description, final int servingSize,
+			final ServingSizeType servingSizeType) {
 		this.name = name;
 		this.description = description;
 		this.servingSize = servingSize;
@@ -51,7 +59,7 @@ public class Recipe extends StorageEntity {
 		return tags;
 	}
 
-	public void setTags(List<String> tags) {
+	public void setTags(final List<String> tags) {
 		this.tags = tags;
 	}
 
@@ -59,7 +67,7 @@ public class Recipe extends StorageEntity {
 		return servingSize;
 	}
 
-	public void setServingSize(int servingSize) {
+	public void setServingSize(final int servingSize) {
 		this.servingSize = servingSize;
 	}
 
@@ -67,7 +75,7 @@ public class Recipe extends StorageEntity {
 		return servingSizeType;
 	}
 
-	public void setServingSizeType(ServingSizeType servingSizeType) {
+	public void setServingSizeType(final ServingSizeType servingSizeType) {
 		this.servingSizeType = servingSizeType;
 	}
 
@@ -75,7 +83,7 @@ public class Recipe extends StorageEntity {
 		return parts;
 	}
 
-	public void setParts(List<RecipePart> parts) {
+	public void setParts(final List<RecipePart> parts) {
 		this.parts = parts;
 	}
 
@@ -84,7 +92,7 @@ public class Recipe extends StorageEntity {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -92,7 +100,7 @@ public class Recipe extends StorageEntity {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 }
