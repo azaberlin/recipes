@@ -45,65 +45,31 @@ public class RecipesUI extends UI implements ViewDisplay {
 	@Autowired
 	private RecipeRepository repository;
 
-	private CssLayout viewContainer;
+	private VerticalLayout uiLayout;
+	private View lastView;
 
 	@Override
 	protected void init(final VaadinRequest request) {
 		createTestData(); // TODO remove
 
-		VerticalLayout uiLayout = initLayout();
+		uiLayout = initLayout();
 		createTitle(uiLayout);
 
-		this.viewContainer = new CssLayout();
-		this.viewContainer.setSizeFull();
-		uiLayout.addComponentsAndExpand(this.viewContainer);
-
-		/*		String pathInfo = request.getPathInfo();
-				if (pathInfo.length() > 1) {
-		
-					Optional<Long> idFromUrlPath = extractIdFromUrlPath(pathInfo);
-					if (idFromUrlPath.isPresent()) {
-						Recipe recipe = this.repository.findOne(idFromUrlPath.get());
-						if (recipe != null) {
-							createRecipeDetails(recipe, uiLayout);
-						} else {
-							createRecipeNotFoundInfo(uiLayout);
-							createOverview(uiLayout);
-						}
-					} else {
-						createUnknownOrInvalidUrlInfo(uiLayout);
-						createOverview(uiLayout);
-					}
-				} else {
-					createOverview(uiLayout);
-				}
-		*/
 		setContent(uiLayout);
 	}
 
 	@Override
 	public void showView(final View view) {
-		this.viewContainer.removeAllComponents();
-		this.viewContainer.addComponent(view.getViewComponent());
-	}
-
-	/**
-	 * Tries to extract the recipe id from the given path info. Returns the value;
-	 * 
-	 * @param pathInfo
-	 * @return
-	 */
-	private Optional<Long> extractIdFromUrlPath(final String pathInfo) {
-		if (pathInfo.matches(PATH_BASE_SHOW_RECIPE + "/[0-9]+")) {
-			return Optional.of(Long.valueOf(pathInfo.substring(PATH_BASE_SHOW_RECIPE.length() + 1)));
+		View currentView = getNavigator().getCurrentView();
+		if (currentView != null) {
+			uiLayout.removeComponent(currentView.getViewComponent());
 		}
-
-		return Optional.empty();
+		uiLayout.addComponentsAndExpand(view.getViewComponent());
 	}
 
 	/**
 	 * Initializes this UI's basic layout.
-	 * 
+	 *
 	 * @return basic layout
 	 */
 	private VerticalLayout initLayout() {
@@ -114,11 +80,12 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	/**
 	 * Creates the UI's title line and the returns the root component.
-	 * @param uiLayout 
+	 *
+	 * @param uiLayout
 	 * @return title
 	 */
 	private Component createTitle(final VerticalLayout uiLayout) {
-		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + " Mein Rezeptbuch", ContentMode.HTML);
+		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + "&nbsp;&nbsp;&nbsp;mein rezeptbuch&nbsp;&nbsp;" + VaadinIcons.GLASS.getHtml(), ContentMode.HTML);
 		title.addStyleName(ValoTheme.LABEL_H1);
 		title.addStyleName(ValoTheme.LABEL_COLORED);
 		uiLayout.addComponent(title);
@@ -127,8 +94,8 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	/**
 	 * Creates the "url invalid" info component.
-	 * @param uiLayout 
-	 * 
+	 *
+	 * @param uiLayout
 	 * @return component
 	 */
 	private Component createUnknownOrInvalidUrlInfo(final VerticalLayout uiLayout) {
@@ -141,8 +108,8 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	/**
 	 * Creates the "recipe not found" info component.
-	 * @param uiLayout 
-	 * 
+	 *
+	 * @param uiLayout
 	 * @return component
 	 */
 	private Component createRecipeNotFoundInfo(final VerticalLayout uiLayout) {
@@ -160,41 +127,41 @@ public class RecipesUI extends UI implements ViewDisplay {
 		Random random = new Random();
 		IntStream.rangeClosed('A', 'Z').filter(i -> random.nextBoolean())
 				.mapToObj(value -> Character.valueOf((char) value).toString()).forEach(value -> {
-					System.out.println("Create test data for letter " + value);
-					for (int i = 0; i < random.nextInt(5) + 5; i++) {
-						Recipe recipe = new Recipe(value + "-Rezept Nr. " + (i + 1),
-								"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   \n"
-										+ "\n"
-										+ "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.",
-								random.nextInt(10) + 1, ServingSizeType.PERSON);
-						List<RecipePart> parts = new ArrayList<>();
-						recipe.setParts(parts);
+			System.out.println("Create test data for letter " + value);
+			for (int i = 0; i < random.nextInt(5) + 5; i++) {
+				Recipe recipe = new Recipe(value + "-Rezept Nr. " + (i + 1),
+						"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   \n"
+								+ "\n"
+								+ "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.",
+						random.nextInt(10) + 1, ServingSizeType.PERSON);
+				List<RecipePart> parts = new ArrayList<>();
+				recipe.setParts(parts);
 
-						int partsAmount = random.nextInt(5);
-						for (int j = 0; j < partsAmount + 1; j++) {
-							RecipePart recipePart = new RecipePart(recipe, partsAmount > 1 ? "Teil " + (j + 1) : "",
-									"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   \n"
-											+ "\n"
-											+ "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.   \n"
-											+ "\n"
-											+ "Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus.   \n"
-											+ "\n"
-											+ "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea");
-							parts.add(recipePart);
+				int partsAmount = random.nextInt(5);
+				for (int j = 0; j < partsAmount + 1; j++) {
+					RecipePart recipePart = new RecipePart(recipe, partsAmount > 1 ? "Teil " + (j + 1) : "",
+							"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   \n"
+									+ "\n"
+									+ "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.   \n"
+									+ "\n"
+									+ "Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus.   \n"
+									+ "\n"
+									+ "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea");
+					parts.add(recipePart);
 
-							List<Ingredient> ingredients = new ArrayList<>();
-							recipePart.setIngredients(ingredients);
+					List<Ingredient> ingredients = new ArrayList<>();
+					recipePart.setIngredients(ingredients);
 
-							for (int k = 0; k < random.nextInt(5) + 5; k++) {
-								double amount = random.nextInt(5) + 1;
-								Ingredient ingredient = new Ingredient(recipePart, amount, " Karotten");
-								ingredients.add(ingredient);
-							}
-						}
-
-						this.repository.save(recipe);
+					for (int k = 0; k < random.nextInt(5) + 5; k++) {
+						double amount = random.nextInt(5) + 1;
+						Ingredient ingredient = new Ingredient(recipePart, amount, " Karotten");
+						ingredients.add(ingredient);
 					}
+				}
 
-				});
+				this.repository.save(recipe);
+			}
+
+		});
 	}
 }

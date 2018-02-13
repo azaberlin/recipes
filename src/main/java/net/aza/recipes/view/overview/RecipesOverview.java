@@ -1,5 +1,6 @@
 package net.aza.recipes.view.overview;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -17,6 +18,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -40,7 +42,7 @@ import net.aza.recipes.view.details.RecipeDetails;
 @SpringView(name = RecipesOverview.VIEW_NAME)
 public class RecipesOverview extends CustomComponent implements View {
 
-	static final String VIEW_NAME = "";
+	public static final String VIEW_NAME = "";
 
 	private static final long serialVersionUID = -3106739615646238527L;
 
@@ -54,6 +56,7 @@ public class RecipesOverview extends CustomComponent implements View {
 		this.sheet = new TabSheet();
 		this.sheet.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
 		this.sheet.addStyleName("recipe-navigation");
+		this.sheet.addStyleName(ValoTheme.TABSHEET_FRAMED);
 		this.sheet.setSizeFull();
 
 		setCompositionRoot(this.sheet);
@@ -74,10 +77,26 @@ public class RecipesOverview extends CustomComponent implements View {
 
 			RecipesOverviewContentPage page = (RecipesOverviewContentPage) tabEvent.getTabSheet().getSelectedTab();
 			this.selectedPage = page;
+
+			// store category for returning to this page
+			getSession().setAttribute("last_category", page.getCategory());
+
 			page.loadAndShowRecipes();
 		});
 
-		getSelectedPage().ifPresent(initPage -> initPage.loadAndShowRecipes());
+		// try to restore last selected tab if returning to this page
+		String lastCategory = (String) getSession().getAttribute("last_category");
+		if (lastCategory != null) {
+			Iterator<Component> iterator = this.sheet.iterator();
+			while (iterator.hasNext()) {
+				RecipesOverviewContentPage page = (RecipesOverviewContentPage) iterator.next();
+				if (lastCategory.equals(page.getCategory())) {
+					this.sheet.setSelectedTab(page);
+				}
+			}
+		}
+
+		getSelectedPage().ifPresent(RecipesOverviewContentPage::loadAndShowRecipes);
 	}
 
 	/**
@@ -113,6 +132,10 @@ public class RecipesOverview extends CustomComponent implements View {
 			setDefaultComponentAlignment(Alignment.TOP_CENTER);
 		}
 
+		public String getCategory() {
+			return this.category;
+		}
+
 		/**
 		 * Clears this page and removes all the recipes.
 		 */
@@ -131,13 +154,6 @@ public class RecipesOverview extends CustomComponent implements View {
 
 			Executors.newSingleThreadExecutor().submit(() -> {
 				List<Recipe> list = loadRecipesFromRepository();
-
-				// TODO just a timeout simulation to have a feeling of lazyloading
-				try {
-					Thread.sleep(new Random().nextInt(1000) + 500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 
 				getUI().access(() -> {
 					addRecipes(list);

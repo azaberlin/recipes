@@ -2,24 +2,24 @@ package net.aza.recipes.view.details;
 
 import java.util.LinkedHashSet;
 
+import javax.annotation.PostConstruct;
+
+import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.overview.RecipesOverview;
 
-@SpringView(name = "show")
-public class RecipeDetails extends VerticalLayout implements View {
+@SpringView(name = RecipeDetails.VIEW_NAME)
+public class RecipeDetails extends Panel implements View {
 
 	public static final String VIEW_NAME = "show";
 	private static final long serialVersionUID = 2078142131705053643L;
@@ -27,6 +27,30 @@ public class RecipeDetails extends VerticalLayout implements View {
 
 	@Autowired
 	private RecipeRepository repository;
+	private VerticalLayout layout;
+
+	@PostConstruct
+	private void init() {
+		layout = new VerticalLayout();
+
+		HorizontalLayout toolbar = new HorizontalLayout();
+		toolbar.setWidth(100, Unit.PERCENTAGE);
+
+		Button closeButton = new Button(VaadinIcons.CLOSE);
+		closeButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+		closeButton.addClickListener(event -> getUI().getNavigator().navigateTo(RecipesOverview.VIEW_NAME));
+
+		toolbar.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
+		toolbar.addComponent(closeButton);
+
+		layout.addComponent(toolbar);
+		layout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+
+		setContent(layout);
+		addStyleName(ValoTheme.PANEL_BORDERLESS);
+		addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+		setSizeFull();
+	}
 
 	@Override
 	public void enter(final ViewChangeEvent event) {
@@ -36,10 +60,10 @@ public class RecipeDetails extends VerticalLayout implements View {
 
 			Recipe recipe = this.repository.findOne(id);
 			if (recipe != null) {
-				this.servingSize = Integer.valueOf(recipe.getServingSize());
+				this.servingSize = recipe.getServingSize();
 
-				addComponent(createRecipeTitle(recipe));
-				addComponent(createAmountCalculationPart(recipe));
+				layout.addComponent(createRecipeTitle(recipe));
+				layout.addComponent(createAmountCalculationPart(recipe));
 
 				// show ingredients
 				LinkedHashSet<RecipePart> parts = new LinkedHashSet<>(recipe.getParts());
@@ -94,36 +118,36 @@ public class RecipeDetails extends VerticalLayout implements View {
 	private void createIngredientsPart(final LinkedHashSet<RecipePart> parts) {
 		Label title = new Label("Was benötigst Du?");
 		title.addStyleName(ValoTheme.LABEL_H3);
-		addComponent(title);
+		layout.addComponent(title);
 
 		parts.forEach(p -> {
 			if (nameIsNotEmpty(p)) {
 				Label partTitle = new Label("... für " + p.getName());
 				partTitle.addStyleName(ValoTheme.LABEL_H4);
-				addComponent(partTitle);
+				layout.addComponent(partTitle);
 			}
 
 			// TODO cache created ingredient parts and update their content in another
 			// method.
-			addComponent(new IngredientsPart(this.servingSize, p.getIngredients()));
+			layout.addComponent(new IngredientsPart(this.servingSize, p.getIngredients()));
 		});
 	}
 
 	private void createInstructionsPart(final LinkedHashSet<RecipePart> parts) {
 		Label title = new Label("Was ist zu tun?");
 		title.addStyleName(ValoTheme.LABEL_H3);
-		addComponent(title);
+		layout.addComponent(title);
 
 		parts.forEach(p -> {
 			if (nameIsNotEmpty(p)) {
 				Label partTitle = new Label(p.getName());
 				partTitle.addStyleName(ValoTheme.LABEL_H4);
-				addComponent(partTitle);
+				layout.addComponent(partTitle);
 			}
 
 			Label instructions = new Label(p.getInstructions());
 			instructions.setWidth(50, Unit.PERCENTAGE);
-			addComponent(instructions);
+			layout.addComponent(instructions);
 		});
 	}
 

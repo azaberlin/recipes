@@ -6,7 +6,7 @@
 	.v-button-light {
 		color : #ccc;
 	}
-	
+
 	.v-label-failure {
 		border-style : none;
 	}
@@ -18,8 +18,14 @@
 
 	.v-textfield-serving-size {
 		width:30px;
-		border: 0 none;
-		border-bottom: 1px solid $r-base-color;
+		border: 0 none #fff !important;
+		border-bottom: 1px solid $r-base-color !important;
+		box-shadow: none;
+		text-align: center;
+	}
+
+	.v-label-h1 {
+		margin-bottom : 0.5em;
 	}
 
 }
