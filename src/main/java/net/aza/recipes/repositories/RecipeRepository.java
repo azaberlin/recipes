@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
-	List<Recipe> findByNameLike(String namePart);
+	List<Recipe> findAllByNameLike(String namePart);
 	int countByNameLike(String namePart);
 }

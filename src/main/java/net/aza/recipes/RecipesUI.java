@@ -2,6 +2,7 @@ package net.aza.recipes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -11,13 +12,16 @@ import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.PushStateNavigation;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -32,7 +36,8 @@ import net.aza.recipes.repositories.RecipeRepository;
 @PushStateNavigation
 @SpringUI
 @Theme("recipes")
-public class RecipesUI extends UI {
+@SpringViewDisplay
+public class RecipesUI extends UI implements ViewDisplay {
 	private static final long serialVersionUID = 4432650588283258437L;
 
 	public static final String PATH_BASE_SHOW_RECIPE = "/show";
@@ -40,91 +45,117 @@ public class RecipesUI extends UI {
 	@Autowired
 	private RecipeRepository repository;
 
+	private CssLayout viewContainer;
+
 	@Override
 	protected void init(final VaadinRequest request) {
 		createTestData(); // TODO remove
 
 		VerticalLayout uiLayout = initLayout();
-		uiLayout.addComponents(createTitle());
+		createTitle(uiLayout);
 
-		String pathInfo = request.getPathInfo();
-		if (pathInfo.length() > 1) {
+		this.viewContainer = new CssLayout();
+		this.viewContainer.setSizeFull();
+		uiLayout.addComponentsAndExpand(this.viewContainer);
 
-			Long idFromUrlPath = extractIdFromUrlPath(pathInfo);
-			if (idFromUrlPath != null) {
-				Recipe recipe = repository.findOne(idFromUrlPath);
-				if (recipe != null) {
-					uiLayout.addComponent(createShowRecipeContent(recipe));
+		/*		String pathInfo = request.getPathInfo();
+				if (pathInfo.length() > 1) {
+		
+					Optional<Long> idFromUrlPath = extractIdFromUrlPath(pathInfo);
+					if (idFromUrlPath.isPresent()) {
+						Recipe recipe = this.repository.findOne(idFromUrlPath.get());
+						if (recipe != null) {
+							createRecipeDetails(recipe, uiLayout);
+						} else {
+							createRecipeNotFoundInfo(uiLayout);
+							createOverview(uiLayout);
+						}
+					} else {
+						createUnknownOrInvalidUrlInfo(uiLayout);
+						createOverview(uiLayout);
+					}
 				} else {
-					uiLayout.addComponent(createRecipeNotFoundInfo());
-					uiLayout.addComponentsAndExpand(createOverview());
+					createOverview(uiLayout);
 				}
-			} else {
-				uiLayout.addComponent(createUnknownOrInvalidUrlInfo());
-				uiLayout.addComponentsAndExpand(createOverview());
-			}
-		} else {
-			uiLayout.addComponentsAndExpand(createOverview());
-		}
-
+		*/
 		setContent(uiLayout);
 	}
 
-	private Component createUnknownOrInvalidUrlInfo() {
-		Label label = new Label(
-				"Leider konnten wir die angegebene URL nicht verarbeiten. Wir haben Dir einfach mal die Übersicht geladen. :)");
-		label.addStyleName(ValoTheme.LABEL_FAILURE);
-		return label;
+	@Override
+	public void showView(final View view) {
+		this.viewContainer.removeAllComponents();
+		this.viewContainer.addComponent(view.getViewComponent());
 	}
 
-	private Component createShowRecipeContent(final Recipe recipe) {
-		return new RecipeDetailsPage(recipe);
+	/**
+	 * Tries to extract the recipe id from the given path info. Returns the value;
+	 * 
+	 * @param pathInfo
+	 * @return
+	 */
+	private Optional<Long> extractIdFromUrlPath(final String pathInfo) {
+		if (pathInfo.matches(PATH_BASE_SHOW_RECIPE + "/[0-9]+")) {
+			return Optional.of(Long.valueOf(pathInfo.substring(PATH_BASE_SHOW_RECIPE.length() + 1)));
+		}
+
+		return Optional.empty();
 	}
 
-	private Component createRecipeNotFoundInfo() {
-		Label label = new Label(
-				"Leider konnten wir das angegebene Rezept nicht finden. Aber vielleicht findest Du ja ein anderes, was Dir gefällt :)");
-		label.addStyleName(ValoTheme.LABEL_FAILURE);
-		return label;
-	}
-
+	/**
+	 * Initializes this UI's basic layout.
+	 * 
+	 * @return basic layout
+	 */
 	private VerticalLayout initLayout() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
 		return layout;
 	}
 
-	private Label createTitle() {
+	/**
+	 * Creates the UI's title line and the returns the root component.
+	 * @param uiLayout 
+	 * @return title
+	 */
+	private Component createTitle(final VerticalLayout uiLayout) {
 		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + " Mein Rezeptbuch", ContentMode.HTML);
 		title.addStyleName(ValoTheme.LABEL_H1);
 		title.addStyleName(ValoTheme.LABEL_COLORED);
+		uiLayout.addComponent(title);
 		return title;
 	}
 
-	private Component createOverview() {
-		TabSheet sheet = new TabSheet();
-		sheet.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
-		sheet.addStyleName("recipe-navigation");
-
-		IntStream.rangeClosed('A', 'Z').mapToObj(value -> Character.valueOf((char) value).toString())
-				.filter(s -> repository.countByNameLike(s + "%") > 0)
-				.forEach(value -> sheet.addComponent(new RecipesPage(value, repository.findByNameLike(value + "%"))));
-
-		return sheet;
+	/**
+	 * Creates the "url invalid" info component.
+	 * @param uiLayout 
+	 * 
+	 * @return component
+	 */
+	private Component createUnknownOrInvalidUrlInfo(final VerticalLayout uiLayout) {
+		Label label = new Label(
+				"Leider konnten wir die angegebene URL nicht verarbeiten. Wir haben Dir einfach mal die Übersicht geladen. :)");
+		label.addStyleName(ValoTheme.LABEL_FAILURE);
+		uiLayout.addComponent(label);
+		return label;
 	}
 
-	private Long extractIdFromUrlPath(final String pathInfo) {
-		if (pathInfo.matches(PATH_BASE_SHOW_RECIPE + "/[0-9]+")) {
-			return Long.valueOf(pathInfo.substring(PATH_BASE_SHOW_RECIPE.length() + 1));
-		}
-
-		return null;
+	/**
+	 * Creates the "recipe not found" info component.
+	 * @param uiLayout 
+	 * 
+	 * @return component
+	 */
+	private Component createRecipeNotFoundInfo(final VerticalLayout uiLayout) {
+		Label label = new Label(
+				"Leider konnten wir das angegebene Rezept nicht finden. Aber vielleicht findest Du ja ein anderes, was Dir gefällt :)");
+		label.addStyleName(ValoTheme.LABEL_FAILURE);
+		uiLayout.addComponent(label);
+		return label;
 	}
 
 	/*
 	 * TO BE REMOVED LATER
 	 */
-
 	private void createTestData() {
 		Random random = new Random();
 		IntStream.rangeClosed('A', 'Z').filter(i -> random.nextBoolean())
@@ -161,7 +192,7 @@ public class RecipesUI extends UI {
 							}
 						}
 
-						repository.save(recipe);
+						this.repository.save(recipe);
 					}
 
 				});

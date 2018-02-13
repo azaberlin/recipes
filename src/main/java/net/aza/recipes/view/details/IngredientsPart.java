@@ -1,4 +1,4 @@
-package net.aza.recipes;
+package net.aza.recipes.view.details;
 
 import java.util.List;
 

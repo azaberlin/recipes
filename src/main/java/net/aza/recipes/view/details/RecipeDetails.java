@@ -1,7 +1,12 @@
-package net.aza.recipes;
+package net.aza.recipes.view.details;
 
 import java.util.LinkedHashSet;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -11,23 +16,38 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
+import net.aza.recipes.repositories.RecipeRepository;
 
-public class RecipeDetailsPage extends VerticalLayout {
+@SpringView(name = "show")
+public class RecipeDetails extends VerticalLayout implements View {
+
+	public static final String VIEW_NAME = "show";
 	private static final long serialVersionUID = 2078142131705053643L;
 	private Integer servingSize;
 
-	public RecipeDetailsPage(final Recipe recipe) {
-		this.servingSize = Integer.valueOf(recipe.getServingSize());
+	@Autowired
+	private RecipeRepository repository;
 
-		addComponent(createRecipeTitle(recipe));
-		addComponent(createAmountCalculationPart(recipe));
+	@Override
+	public void enter(final ViewChangeEvent event) {
+		String parameters = event.getParameters();
+		if (parameters.matches("[1-9][0-9]*")) {
+			Long id = Long.valueOf(parameters);
 
-		// show ingredients
-		LinkedHashSet<RecipePart> parts = new LinkedHashSet<>(recipe.getParts());
+			Recipe recipe = this.repository.findOne(id);
+			if (recipe != null) {
+				this.servingSize = Integer.valueOf(recipe.getServingSize());
 
-		createIngredientsPart(parts);
-		createInstructionsPart(parts);
+				addComponent(createRecipeTitle(recipe));
+				addComponent(createAmountCalculationPart(recipe));
 
+				// show ingredients
+				LinkedHashSet<RecipePart> parts = new LinkedHashSet<>(recipe.getParts());
+
+				createIngredientsPart(parts);
+				createInstructionsPart(parts);
+			}
+		}
 	}
 
 	private Component createAmountCalculationPart(final Recipe recipe) {
