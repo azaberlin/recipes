@@ -58,10 +58,30 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 				layout.addComponent(createAmountCalculationPart(recipe));
 
 				// show ingredients
+				// TODO we encapsulate the list into a linkedHashSet because of Hibernates. Can be extracted to a
+				// service method later.
 				LinkedHashSet<RecipePart> parts = new LinkedHashSet<>(recipe.getParts());
 
-				createIngredientsPart(parts);
-				createInstructionsPart(parts);
+				parts.forEach(p -> {
+					if (nameIsNotEmpty(p)) {
+						Label partTitle = new Label(p.getName());
+						partTitle.addStyleName(ValoTheme.LABEL_H4);
+						layout.addComponent(partTitle);
+					}
+
+					Label instructions = new Label(p.getInstructions());
+					instructions.addStyleName("wrap");
+
+					HorizontalLayout instructionListItem = new HorizontalLayout();
+					instructionListItem.setWidth(100, Unit.PERCENTAGE);
+					instructionListItem.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
+
+					IngredientsPart ingredientsPart = new IngredientsPart(this.servingSize, p.getIngredients());
+					instructionListItem.addComponent(ingredientsPart);
+					instructionListItem.addComponent(instructions);
+
+					layout.addComponent(instructionListItem);
+				});
 			}
 		}
 	}
@@ -107,7 +127,7 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		return p.getName() != null && !p.getName().isEmpty();
 	}
 
-	private void createIngredientsPart(final LinkedHashSet<RecipePart> parts) {
+	/*private void createIngredientsPart(final LinkedHashSet<RecipePart> parts) {
 		Label title = new Label("Was benötigst Du?");
 		title.addStyleName(ValoTheme.LABEL_H3);
 		layout.addComponent(title);
@@ -141,6 +161,39 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 			instructions.setWidth(50, Unit.PERCENTAGE);
 			layout.addComponent(instructions);
 		});
+
+		parts.forEach(p -> {
+			if (nameIsNotEmpty(p)) {
+				Label partTitle = new Label("... für " + p.getName());
+				partTitle.addStyleName(ValoTheme.LABEL_H4);
+				layout.addComponent(partTitle);
+			}
+
+			// TODO cache created ingredient parts and update their content in another
+			// method.
+			layout.addComponent(new IngredientsPart(this.servingSize, p.getIngredients()));
+		});
+	}*/
+
+
+	@Override
+	public void extendLeftPart(ComponentContainer container) {
+		VerticalLayout layout = new VerticalLayout();
+
+		layout.setMargin(false);
+		layout.setSizeFull();
+		layout.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
+
+		Button closeButton = new Button(VaadinIcons.FILE_TEXT);
+		closeButton.setDescription("Alle Zutaten zusammengefasst anzeigen");
+		closeButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+
+		closeButton.addClickListener(event -> {
+			Notification.show("TODO...");
+		});
+
+		layout.addComponent(closeButton);
+		container.addComponent(layout);
 	}
 
 	@Override
