@@ -37,4 +37,13 @@
 		margin-top : 0;
 	}
 
+	.recipes-ui {
+		background-color: hsl($r-base-color-hue, 50% , 95%);
+	}
+
+	.recipes-ui .recipes-content-container {
+		background-color: #fff;
+		border: 1px solid hsl($r-base-color-hue, 50% , 75%);;
+	}
+
 }

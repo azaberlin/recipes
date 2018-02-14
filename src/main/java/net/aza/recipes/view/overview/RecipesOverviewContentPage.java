@@ -17,9 +17,10 @@ import java.util.concurrent.Executors;
  *
  * @author Stefan Uebe
  */
-class RecipesOverviewContentPage extends VerticalLayout {
+class RecipesOverviewContentPage extends Panel {
 	private final String category;
 	private final RecipeRepository repository;
+	private final VerticalLayout layout;
 
 	/**
 	 * Creates a new page for a certain category (i. e. "A").
@@ -29,10 +30,14 @@ class RecipesOverviewContentPage extends VerticalLayout {
 	RecipesOverviewContentPage(final String category, RecipeRepository repository) {
 		this.category = category;
 		this.repository = repository;
-		setCaption(category);
-		setDefaultComponentAlignment(Alignment.TOP_CENTER);
 
+		layout = new VerticalLayout();
+
+		layout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+		setContent(layout);
+		setSizeFull();
 		addStyleName("recipes-overview-content-page");
+		addStyleName("recipes-content-container");
 	}
 
 	public String getCategory() {
@@ -43,7 +48,7 @@ class RecipesOverviewContentPage extends VerticalLayout {
 	 * Clears this page and removes all the recipes.
 	 */
 	public void clearPage() {
-		removeAllComponents();
+		layout.removeAllComponents();
 	}
 
 	/**
@@ -53,7 +58,7 @@ class RecipesOverviewContentPage extends VerticalLayout {
 	public void loadAndShowRecipes() {
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setIndeterminate(true);
-		addComponent(progressBar);
+		layout.addComponent(progressBar);
 
 		Executors.newSingleThreadExecutor().submit(() -> {
 			List<Recipe> list = loadRecipesFromRepository();
@@ -104,7 +109,7 @@ class RecipesOverviewContentPage extends VerticalLayout {
 			titleLayout.addComponent(showRecipeDetails);
 			titleLayout.setComponentAlignment(showRecipeDetails, Alignment.MIDDLE_LEFT);
 
-			addComponent(titleLayout);
+			layout.addComponent(titleLayout);
 
 			String description = recipe.getDescription();
 			int length = description.length();
@@ -112,7 +117,7 @@ class RecipesOverviewContentPage extends VerticalLayout {
 					length > 300 ? description.substring(0, 300) + "..." : description);
 			receiptDescription.setWidth(50, Unit.PERCENTAGE);
 
-			addComponent(receiptDescription);
+			layout.addComponent(receiptDescription);
 
 		});
 	}

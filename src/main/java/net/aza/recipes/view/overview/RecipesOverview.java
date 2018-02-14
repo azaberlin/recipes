@@ -40,7 +40,7 @@ public class RecipesOverview extends CustomComponent implements View {
 		this.sheet = new TabSheet();
 		this.sheet.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
 		this.sheet.addStyleName("recipe-navigation");
-		this.sheet.addStyleName(ValoTheme.TABSHEET_FRAMED);
+//		this.sheet.addStyleName(ValoTheme.TABSHEET_FRAMED);
 		this.sheet.setSizeFull();
 
 		setCompositionRoot(this.sheet);
@@ -52,7 +52,7 @@ public class RecipesOverview extends CustomComponent implements View {
 				.mapToObj(value -> Character.valueOf((char) value).toString())
 				.filter(s -> this.repository.countByNameLike(s + "%") > 0);
 
-		filteredStream.forEach(value -> this.sheet.addTab(new RecipesOverviewContentPage(value, this.repository)));
+		filteredStream.forEach(value -> this.sheet.addTab(new RecipesOverviewContentPage(value, this.repository), value));
 
 		this.sheet.addSelectedTabChangeListener(tabEvent -> {
 			if (this.selectedPage != null) {

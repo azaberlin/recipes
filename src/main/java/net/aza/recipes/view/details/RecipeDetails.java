@@ -40,6 +40,7 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		setContent(layout);
 		addStyleName(ValoTheme.PANEL_BORDERLESS);
 		addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+		addStyleName("recipes-content-container");
 		setSizeFull();
 	}
 
