@@ -1,13 +1,6 @@
 package net.aza.recipes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.stream.IntStream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.icons.VaadinIcons;
@@ -18,25 +11,27 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-
 import net.aza.recipes.model.Ingredient;
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.model.ServingSizeType;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.MainTitleExtender;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 @Push
 @PushStateNavigation
 @SpringUI
 @Theme("recipes")
 @SpringViewDisplay
+//@PreserveOnRefresh
 public class RecipesUI extends UI implements ViewDisplay {
 	private static final long serialVersionUID = 4432650588283258437L;
 
@@ -47,6 +42,8 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	private VerticalLayout uiLayout;
 	private View lastView;
+	private CssLayout extendableLeftPart;
+	private CssLayout extendableRightPart;
 
 	@Override
 	protected void init(final VaadinRequest request) {
@@ -60,10 +57,19 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	@Override
 	public void showView(final View view) {
+		extendableLeftPart.removeAllComponents();
+		extendableRightPart.removeAllComponents();
+
 		View currentView = getNavigator().getCurrentView();
 		if (currentView != null) {
 			uiLayout.removeComponent(currentView.getViewComponent());
 		}
+
+		if (view instanceof MainTitleExtender) {
+			((MainTitleExtender) view).extendLeftPart(extendableLeftPart);
+			((MainTitleExtender) view).extendRightPart(extendableRightPart);
+		}
+
 		uiLayout.addComponentsAndExpand(view.getViewComponent());
 	}
 
@@ -88,7 +94,20 @@ public class RecipesUI extends UI implements ViewDisplay {
 		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + "&nbsp;&nbsp;&nbsp;mein rezeptbuch&nbsp;&nbsp;" + VaadinIcons.GLASS.getHtml(), ContentMode.HTML);
 		title.addStyleName(ValoTheme.LABEL_H1);
 		title.addStyleName(ValoTheme.LABEL_COLORED);
-		uiLayout.addComponent(title);
+
+		extendableLeftPart = new CssLayout();
+		extendableRightPart = new CssLayout();
+
+		extendableLeftPart.setSizeFull();
+		extendableRightPart.setSizeFull();
+
+		HorizontalLayout titleBar = new HorizontalLayout();
+		titleBar.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+		titleBar.setWidth(100,Unit.PERCENTAGE);
+		titleBar.addComponents(extendableLeftPart, title, extendableRightPart);
+
+		uiLayout.addComponents(titleBar);
+
 		return title;
 	}
 

@@ -1,10 +1,13 @@
 package net.aza.recipes.view.details;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
+import net.aza.recipes.view.MainTitleExtender;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.icons.VaadinIcons;
@@ -19,7 +22,7 @@ import net.aza.recipes.repositories.RecipeRepository;
 import net.aza.recipes.view.overview.RecipesOverview;
 
 @SpringView(name = RecipeDetails.VIEW_NAME)
-public class RecipeDetails extends Panel implements View {
+public class RecipeDetails extends Panel implements View, MainTitleExtender {
 
 	public static final String VIEW_NAME = "show";
 	private static final long serialVersionUID = 2078142131705053643L;
@@ -32,18 +35,6 @@ public class RecipeDetails extends Panel implements View {
 	@PostConstruct
 	private void init() {
 		layout = new VerticalLayout();
-
-		HorizontalLayout toolbar = new HorizontalLayout();
-		toolbar.setWidth(100, Unit.PERCENTAGE);
-
-		Button closeButton = new Button(VaadinIcons.CLOSE);
-		closeButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-		closeButton.addClickListener(event -> getUI().getNavigator().navigateTo(RecipesOverview.VIEW_NAME));
-
-		toolbar.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
-		toolbar.addComponent(closeButton);
-
-		layout.addComponent(toolbar);
 		layout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
 
 		setContent(layout);
@@ -151,4 +142,26 @@ public class RecipeDetails extends Panel implements View {
 		});
 	}
 
+	@Override
+	public void extendRightPart(ComponentContainer container) {
+		VerticalLayout layout = new VerticalLayout();
+
+		layout.setMargin(false);
+		layout.setSizeFull();
+		layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+
+		Button closeButton = new Button(VaadinIcons.CLOSE);
+		closeButton.setDescription("Rezept schließen");
+		closeButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+
+		closeButton.addClickListener(event -> {
+			// since the overview opens this view in a new window we will provide a "soft close" additional
+			// to the native close of the browser.
+			Page.getCurrent().getJavaScript().execute("close()");
+			getUI().close();
+		});
+
+		layout.addComponent(closeButton);
+		container.addComponent(layout);
+	}
 }

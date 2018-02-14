@@ -28,4 +28,13 @@
 		margin-bottom : 0.5em;
 	}
 
+	.recipes-overview-content-page .title-bar .v-link {
+		margin-top : 1.6em;
+	}
+
+	/*first recipe title has no margin-top so the link must not have so either*/
+	.recipes-overview-content-page .v-slot-title-bar:first-child .v-link {
+		margin-top : 0;
+	}
+
 }
