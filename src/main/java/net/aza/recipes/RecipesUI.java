@@ -35,8 +35,6 @@ import java.util.stream.IntStream;
 public class RecipesUI extends UI implements ViewDisplay {
 	private static final long serialVersionUID = 4432650588283258437L;
 
-	public static final String PATH_BASE_SHOW_RECIPE = "/show";
-
 	@Autowired
 	private RecipeRepository repository;
 
@@ -120,7 +118,7 @@ public class RecipesUI extends UI implements ViewDisplay {
 	/**
 	 * Creates the "url invalid" info component.
 	 *
-	 * @param uiLayout
+	 * @param
 	 * @return component
 	 */
 	private Component createUnknownOrInvalidUrlInfo(final VerticalLayout uiLayout) {
