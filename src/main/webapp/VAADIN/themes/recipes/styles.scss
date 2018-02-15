@@ -1,5 +1,10 @@
 @import "variables";
 
+@keyframes highlight-definition {
+	from { color: $r-base-color-light; }
+	to { color: inherited; }
+}
+
 .recipes {
 	@include valo;
 
@@ -41,9 +46,10 @@
 		background-color: hsl($r-base-color-hue, 50% , 95%);
 	}
 
-	.recipes-ui .recipes-content-container {
+	.recipes-ui .recipes-content-container,
+	.recipes-ui .v-tabsheet-content-recipe-navigation {
 		background-color: #fff;
-		border: 1px solid hsl($r-base-color-hue, 50% , 75%);
+		border: 1px solid $r-base-color-light;
 	}
 
 	.wrap {
@@ -64,9 +70,17 @@
     .v-window-contents > .v-scrollable > .v-margin-right {
         padding-right: 2em;
     }
-    .v-window-contents > .v-scrollable > .v-margin-top
-    	padding-top: 2em;
+    .v-window-contents > .v-scrollable > .v-margin-top {
+    	padding-top: 1em;
     }
 
+	.highlight {
+		animation-name: highlight-definition;
+		animation-duration: 4s;
+	}
+
+	.v-window-header .v-icon {
+		margin-right:10px;
+	}
 
 }
