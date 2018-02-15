@@ -1,36 +1,39 @@
 package net.aza.recipes.view.details;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import com.vaadin.server.Page;
-import com.vaadin.ui.*;
-import net.aza.recipes.view.MainTitleExtender;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.Page;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-
+import net.aza.recipes.model.Ingredient;
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
+import net.aza.recipes.model.ServingSizeType;
 import net.aza.recipes.repositories.RecipeRepository;
-import net.aza.recipes.view.overview.RecipesOverview;
+import net.aza.recipes.view.MainTitleExtender;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @SpringView(name = RecipeDetails.VIEW_NAME)
 public class RecipeDetails extends Panel implements View, MainTitleExtender {
 
 	public static final String VIEW_NAME = "show";
 	private static final long serialVersionUID = 2078142131705053643L;
-	private Integer servingSize;
+	private int servingSize;
 
 	@Autowired
 	private RecipeRepository repository;
 	private VerticalLayout layout;
+	private Recipe recipe;
+	private Button showIngredientsButton;
+	private List<IngredientsPart> ingredientsParts = new ArrayList<>();
 
 	@PostConstruct
 	private void init() {
@@ -50,7 +53,7 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		if (parameters.matches("[1-9][0-9]*")) {
 			Long id = Long.valueOf(parameters);
 
-			Recipe recipe = this.repository.findOne(id);
+			recipe = this.repository.findOne(id);
 			if (recipe != null) {
 				this.servingSize = recipe.getServingSize();
 
@@ -69,19 +72,28 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 						layout.addComponent(partTitle);
 					}
 
-					Label instructions = new Label(p.getInstructions());
+					Label instructions = new Label(p.getInstructions(), ContentMode.HTML);
 					instructions.addStyleName("wrap");
+					instructions.addStyleName("instructions");
+					instructions.setSizeFull();
+
+					IngredientsPart ingredientsPart = new IngredientsPart(this.servingSize, new LinkedHashSet<>(p.getIngredients()));
+					ingredientsPart.setSizeUndefined();
+					ingredientsPart.setMargin(false);
+
+					ingredientsParts.add(ingredientsPart);
 
 					HorizontalLayout instructionListItem = new HorizontalLayout();
-					instructionListItem.setWidth(100, Unit.PERCENTAGE);
-					instructionListItem.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
+					instructionListItem.setSizeFull();
+					instructionListItem.setWidth(80, Unit.PERCENTAGE);
+					instructionListItem.setDefaultComponentAlignment(Alignment.TOP_CENTER);
 
-					IngredientsPart ingredientsPart = new IngredientsPart(this.servingSize, p.getIngredients());
 					instructionListItem.addComponent(ingredientsPart);
-					instructionListItem.addComponent(instructions);
+					instructionListItem.addComponentsAndExpand(instructions);
 
 					layout.addComponent(instructionListItem);
 				});
+				showIngredientsButton.setVisible(true);
 			}
 		}
 	}
@@ -89,11 +101,15 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 	private Component createAmountCalculationPart(final Recipe recipe) {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.addComponent(new Label("Mengenangaben für "));
+
 		TextField amountField = new TextField();
 		amountField.addStyleName("serving-size");
 		amountField.addStyleName(ValoTheme.TEXTFIELD_SMALL);
+		amountField.setValue(String.valueOf(this.servingSize));
 
-		amountField.setValue(this.servingSize.toString());
+		Label servingSizeTypeField = new Label();
+		updateServingSizeTypeFieldBySize(recipe, servingSizeTypeField);
+
 		amountField.addValueChangeListener(event -> {
 			String value = event.getValue();
 			if (value.isEmpty()) {
@@ -101,16 +117,27 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 			}
 
 			if (value != null && (value.startsWith("-") || !value.matches("[1-9]+[0-9]*"))) {
-				amountField.setValue(this.servingSize.toString());
+				amountField.setValue(String.valueOf(this.servingSize));
 			} else {
 				this.servingSize = value != null ? Integer.valueOf(value) : 0;
+				updateServingSizeTypeFieldBySize(recipe, servingSizeTypeField);
+				updateIngredientAmounts(servingSize);
 			}
 		});
 
 		layout.addComponent(amountField);
-		layout.addComponent(new Label(recipe.getServingSizeType().getDisplayName()));
+		layout.addComponent(servingSizeTypeField);
 
 		return layout;
+	}
+
+	private void updateIngredientAmounts(int servingSize) {
+		ingredientsParts.forEach(components -> components.updateIngredients(servingSize));
+	}
+
+	private void updateServingSizeTypeFieldBySize(Recipe recipe, Label label) {
+		ServingSizeType type = recipe.getServingSizeType();
+		label.setValue(servingSize == 1 ? type.getDisplayNameSingle() : type.getDisplayNameMultiple());
 	}
 
 	private Object calculateIngredients(final Integer value) {
@@ -127,55 +154,6 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		return p.getName() != null && !p.getName().isEmpty();
 	}
 
-	/*private void createIngredientsPart(final LinkedHashSet<RecipePart> parts) {
-		Label title = new Label("Was benötigst Du?");
-		title.addStyleName(ValoTheme.LABEL_H3);
-		layout.addComponent(title);
-
-		parts.forEach(p -> {
-			if (nameIsNotEmpty(p)) {
-				Label partTitle = new Label("... für " + p.getName());
-				partTitle.addStyleName(ValoTheme.LABEL_H4);
-				layout.addComponent(partTitle);
-			}
-
-			// TODO cache created ingredient parts and update their content in another
-			// method.
-			layout.addComponent(new IngredientsPart(this.servingSize, p.getIngredients()));
-		});
-	}
-
-	private void createInstructionsPart(final LinkedHashSet<RecipePart> parts) {
-		Label title = new Label("Was ist zu tun?");
-		title.addStyleName(ValoTheme.LABEL_H3);
-		layout.addComponent(title);
-
-		parts.forEach(p -> {
-			if (nameIsNotEmpty(p)) {
-				Label partTitle = new Label(p.getName());
-				partTitle.addStyleName(ValoTheme.LABEL_H4);
-				layout.addComponent(partTitle);
-			}
-
-			Label instructions = new Label(p.getInstructions());
-			instructions.setWidth(50, Unit.PERCENTAGE);
-			layout.addComponent(instructions);
-		});
-
-		parts.forEach(p -> {
-			if (nameIsNotEmpty(p)) {
-				Label partTitle = new Label("... für " + p.getName());
-				partTitle.addStyleName(ValoTheme.LABEL_H4);
-				layout.addComponent(partTitle);
-			}
-
-			// TODO cache created ingredient parts and update their content in another
-			// method.
-			layout.addComponent(new IngredientsPart(this.servingSize, p.getIngredients()));
-		});
-	}*/
-
-
 	@Override
 	public void extendLeftPart(ComponentContainer container) {
 		VerticalLayout layout = new VerticalLayout();
@@ -184,15 +162,18 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		layout.setSizeFull();
 		layout.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
 
-		Button closeButton = new Button(VaadinIcons.FILE_TEXT);
-		closeButton.setDescription("Alle Zutaten zusammengefasst anzeigen");
-		closeButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+		showIngredientsButton = new Button(VaadinIcons.FILE_TEXT);
+		showIngredientsButton.setDescription("Alle Zutaten zusammengefasst anzeigen");
+		showIngredientsButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+		showIngredientsButton.setVisible(false);
 
-		closeButton.addClickListener(event -> {
-			Notification.show("TODO...");
+		showIngredientsButton.addClickListener(event -> {
+			Window window = new IngredientsShoppingList(recipe);
+			getUI().addWindow(window);
 		});
 
-		layout.addComponent(closeButton);
+		layout.addComponent(showIngredientsButton);
+
 		container.addComponent(layout);
 	}
 
