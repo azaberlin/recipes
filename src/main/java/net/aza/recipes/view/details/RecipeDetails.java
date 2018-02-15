@@ -107,8 +107,21 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		amountField.addStyleName(ValoTheme.TEXTFIELD_SMALL);
 		amountField.setValue(String.valueOf(this.servingSize));
 
+		layout.addComponent(amountField);
+
 		Label servingSizeTypeField = new Label();
 		updateServingSizeTypeFieldBySize(recipe, servingSizeTypeField);
+
+		layout.addComponent(servingSizeTypeField);
+
+		Button resetServingSize = new Button();
+		resetServingSize.setIcon(VaadinIcons.REFRESH);
+		resetServingSize.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_SMALL);
+		resetServingSize.setDescription("Zurücksetzen auf ursprüngliche " + recipe.getServingSizeType().getDisplayNameMultiple() + "zahl");
+		resetServingSize.setVisible(false);
+		resetServingSize.addClickListener(event -> amountField.setValue(String.valueOf(recipe.getServingSize())));
+
+		layout.addComponent(resetServingSize);
 
 		amountField.addValueChangeListener(event -> {
 			String value = event.getValue();
@@ -122,11 +135,10 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 				this.servingSize = value != null ? Integer.valueOf(value) : 0;
 				updateServingSizeTypeFieldBySize(recipe, servingSizeTypeField);
 				updateIngredientAmounts(servingSize);
+
+				resetServingSize.setVisible(servingSize != recipe.getServingSize());
 			}
 		});
-
-		layout.addComponent(amountField);
-		layout.addComponent(servingSizeTypeField);
 
 		return layout;
 	}
@@ -168,7 +180,7 @@ public class RecipeDetails extends Panel implements View, MainTitleExtender {
 		showIngredientsButton.setVisible(false);
 
 		showIngredientsButton.addClickListener(event -> {
-			Window window = new IngredientsShoppingList(recipe);
+			Window window = new IngredientsShoppingList(recipe, this.servingSize);
 			getUI().addWindow(window);
 		});
 
