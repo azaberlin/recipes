@@ -31,7 +31,7 @@ import java.util.stream.IntStream;
 @SpringUI
 @Theme("recipes")
 @SpringViewDisplay
-//@PreserveOnRefresh
+@PreserveOnRefresh
 public class RecipesUI extends UI implements ViewDisplay {
 	private static final long serialVersionUID = 4432650588283258437L;
 
@@ -45,9 +45,14 @@ public class RecipesUI extends UI implements ViewDisplay {
 	private CssLayout extendableLeftPart;
 	private CssLayout extendableRightPart;
 
+	private boolean TEST_FIRST_UI_CALL = true;
+
 	@Override
 	protected void init(final VaadinRequest request) {
-		createTestData(); // TODO remove
+		if(TEST_FIRST_UI_CALL) {
+			createTestData(); // TODO remove
+			TEST_FIRST_UI_CALL= false;
+		}
 
 		uiLayout = initLayout();
 		createTitle(uiLayout);
