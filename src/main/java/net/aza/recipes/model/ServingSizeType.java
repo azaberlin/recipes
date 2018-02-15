@@ -3,7 +3,7 @@ package net.aza.recipes.model;
 public enum ServingSizeType {
 	PERSON("Person", "Personen"),
 	PORTION("Portion", "Portionen"),
-	PIECE("Stück", "Stücke");
+	PIECE("Stück", "Stück");
 
 	private String displayNameSingle;
 	private String displayNameMultiple;
