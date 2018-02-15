@@ -1,5 +1,6 @@
 package net.aza.recipes.view.details;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Label;
@@ -19,25 +20,23 @@ import java.util.stream.Collectors;
  * given serving size (that means that the ingredient amount needs to be based on a serving size of 1).
  */
 class IngredientsShoppingList extends Window {
-	IngredientsShoppingList(Recipe recipe) {
+	IngredientsShoppingList(Recipe recipe, int currentSetServingSize) {
 		center();
 		setModal(true);
-		setCaption("Einkaufsliste");
+		setCaptionAsHtml(true);
+		setCaption("Einkaufsliste für <b>" + recipe.getName() + "</b>");
+		setIcon(VaadinIcons.CART_O);
+
+		setHeight(60, Unit.PERCENTAGE);
 
 		VerticalLayout windowLayout = new VerticalLayout();
 		windowLayout.setMargin(true);
 
-		Label title = new Label(recipe.getName());
-		title.addStyleName(ValoTheme.LABEL_H2);
-		windowLayout.addComponent(title);
-		windowLayout.setComponentAlignment(title, Alignment.TOP_CENTER);
-
-		Label servingSizeLabel = new Label("Für <b>" + recipe.getServingSize() + " " + recipe.getServingSizeType().getDisplayNameByServingSize(recipe.getServingSize()) + "</b> benötigtst Du Folgendes:", ContentMode.HTML);
-		servingSizeLabel.addStyleNames(ValoTheme.LABEL_H3, "wrap");
+		Label servingSizeLabel = new Label("Für <b>" + currentSetServingSize + " " + recipe.getServingSizeType().getDisplayNameByServingSize(currentSetServingSize) + "</b> benötigst Du folgende Zutaten :)", ContentMode.HTML);
 		windowLayout.addComponent(servingSizeLabel);
 
 		Map<String, Double> summedUpIngredientsMap = new LinkedHashSet<>(recipe.getParts()).stream().flatMap(recipePart -> recipePart.getIngredients().stream()).collect(Collectors.toMap(Ingredient::getUnit, Ingredient::getAmount, Double::sum));
-		new TreeMap<>(summedUpIngredientsMap).forEach((k, v) -> windowLayout.addComponent(new Label((v * (double) recipe.getServingSize()) + " " + k)));
+		new TreeMap<>(summedUpIngredientsMap).forEach((k, v) -> windowLayout.addComponent(new Label(VaadinIcons.CIRCLE_THIN.getHtml() + "&nbsp;&nbsp;&nbsp;&nbsp;" + (v * (double) currentSetServingSize) + " " + k, ContentMode.HTML)));
 
 		setContent(windowLayout);
 	}
