@@ -27,7 +27,9 @@ class IngredientsPart extends VerticalLayout {
 	public void updateIngredients(int servingSize) {
 		removeAllComponents();
 		ingredients.forEach(i -> {
-			addComponent(new Label("<b>" + (i.getAmount() * servingSize) + "</b> " + i.getUnit(), ContentMode.HTML));
+			Label label = new Label("<b>" + (i.getAmount() * servingSize) + "</b> " + i.getUnit(), ContentMode.HTML);
+			label.addStyleName("highlight");
+			addComponent(label);
 		});
 	}
 
