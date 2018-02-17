@@ -18,7 +18,6 @@ import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.model.ServingSizeType;
 import net.aza.recipes.repositories.RecipeRepository;
-import net.aza.recipes.view.MainTitleExtender;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -62,17 +61,9 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	@Override
 	public void showView(final View view) {
-		extendableLeftPart.removeAllComponents();
-		extendableRightPart.removeAllComponents();
-
 		View currentView = getNavigator().getCurrentView();
 		if (currentView != null) {
 			uiLayout.removeComponent(currentView.getViewComponent());
-		}
-
-		if (view instanceof MainTitleExtender) {
-			((MainTitleExtender) view).extendLeftPart(extendableLeftPart);
-			((MainTitleExtender) view).extendRightPart(extendableRightPart);
 		}
 
 		uiLayout.addComponentsAndExpand(view.getViewComponent());
