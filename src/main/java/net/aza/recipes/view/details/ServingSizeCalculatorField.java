@@ -60,6 +60,8 @@ public final class ServingSizeCalculatorField extends CustomComponent {
 		layout.addComponent(amountField);
 		layout.addComponent(servingSizeTypeField);
 		setCompositionRoot(layout);
+
+		setSizeUndefined();
 	}
 
 	private void updateServingSizeTypeFieldBySize() {
