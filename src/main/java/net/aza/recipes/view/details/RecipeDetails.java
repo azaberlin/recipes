@@ -1,5 +1,6 @@
 package net.aza.recipes.view.details;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ContentMode;
@@ -10,6 +11,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.ToolbarProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +21,7 @@ import java.util.List;
 
 @ViewScope
 @SpringView(name = RecipeDetails.VIEW_NAME)
-public class RecipeDetails extends CustomComponent implements View {
+public class RecipeDetails extends CustomComponent implements View, ToolbarProvider {
 
 	public static final String VIEW_NAME = "show";
 	private static final long serialVersionUID = 2078142131705053643L;
@@ -56,7 +58,6 @@ public class RecipeDetails extends CustomComponent implements View {
 
 				layout.addComponent(createRecipeTitle(recipe));
 				ServingSizeCalculatorField servingSizeCalculatorField = new ServingSizeCalculatorField(recipe.getServingSize(), recipe.getServingSizeType(), this::updateIngredientAmounts);
-
 				layout.addComponent(servingSizeCalculatorField);
 
 				// show ingredients
@@ -95,6 +96,20 @@ public class RecipeDetails extends CustomComponent implements View {
 
 			}
 		}
+	}
+
+	public void initToolbar(HorizontalLayout toolbar) {
+		Button button = new Button(VaadinIcons.EDIT);
+		button.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_TINY);
+		toolbar.addComponent(button);
+
+		button = new Button(VaadinIcons.FILE_REMOVE);
+		button.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_TINY);
+		toolbar.addComponent(button);
+
+		button = new Button(VaadinIcons.CART_O);
+		button.addStyleNames(ValoTheme.BUTTON_BORDERLESS_COLORED, ValoTheme.BUTTON_TINY);
+		toolbar.addComponent(button);
 	}
 
 	private void updateIngredientAmounts(int servingSize) {

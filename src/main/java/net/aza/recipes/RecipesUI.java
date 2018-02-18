@@ -18,6 +18,7 @@ import net.aza.recipes.model.Recipe;
 import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.model.ServingSizeType;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.ToolbarProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class RecipesUI extends UI implements ViewDisplay {
 	private CssLayout extendableRightPart;
 
 	private boolean TEST_FIRST_UI_CALL = true;
+	private HorizontalLayout toolbar;
 
 	@Override
 	protected void init(final VaadinRequest request) {
@@ -55,6 +57,8 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 		uiLayout = initLayout();
 		createTitle(uiLayout);
+		toolbar = new HorizontalLayout();
+		uiLayout.addComponent(toolbar);
 
 		setContent(uiLayout);
 	}
@@ -64,6 +68,14 @@ public class RecipesUI extends UI implements ViewDisplay {
 		View currentView = getNavigator().getCurrentView();
 		if (currentView != null) {
 			uiLayout.removeComponent(currentView.getViewComponent());
+		}
+
+		toolbar.removeAllComponents();
+		if(view instanceof ToolbarProvider) {
+			toolbar.setVisible(true);
+			((ToolbarProvider) view).initToolbar(toolbar);
+		} else {
+			toolbar.setVisible(false);
 		}
 
 		uiLayout.addComponentsAndExpand(view.getViewComponent());
