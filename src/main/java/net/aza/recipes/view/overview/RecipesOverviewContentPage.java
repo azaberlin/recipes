@@ -6,6 +6,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import net.aza.recipes.model.Recipe;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.URIFragmentBuilder;
 import net.aza.recipes.view.details.RecipeDetails;
 
 import java.util.List;
@@ -97,7 +98,7 @@ class RecipesOverviewContentPage extends Panel {
 
 			titleLayout.addComponent(recipeTitle);
 
-			String uriFragment = "/" + recipe.getId();
+			String uriFragment = URIFragmentBuilder.of(recipe).getFragment();
 
 			Link showRecipeDetails = new Link();
 			showRecipeDetails.setIcon(VaadinIcons.ANGLE_RIGHT);

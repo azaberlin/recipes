@@ -3,6 +3,7 @@ package net.aza.recipes.view.overview;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
  *
  * @author Stefan Uebe
  */
+@ViewScope
 @SpringView(name = RecipesOverview.VIEW_NAME)
 public class RecipesOverview extends CustomComponent implements View {
 
@@ -40,7 +42,6 @@ public class RecipesOverview extends CustomComponent implements View {
 		this.sheet = new TabSheet();
 		this.sheet.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
 		this.sheet.addStyleName("recipe-navigation");
-//		this.sheet.addStyleName(ValoTheme.TABSHEET_FRAMED);
 		this.sheet.setSizeFull();
 
 		setCompositionRoot(this.sheet);
@@ -69,6 +70,17 @@ public class RecipesOverview extends CustomComponent implements View {
 		});
 
 		// try to restore last selected tab if returning to this page
+		// (not needed in current implementation)
+		// restoreLastSelectedTabIfPresent();
+
+		getSelectedPage().ifPresent(RecipesOverviewContentPage::loadAndShowRecipes);
+	}
+
+	/**
+	 * Tries to restore the last selected tab. This function is usefull when all pages are opened in
+	 * one page (currently not implemented).
+	 */
+	private void restoreLastSelectedTabIfPresent() {
 		String lastCategory = (String) getSession().getAttribute("last_category");
 		if (lastCategory != null) {
 			Iterator<Component> iterator = this.sheet.iterator();
@@ -79,8 +91,6 @@ public class RecipesOverview extends CustomComponent implements View {
 				}
 			}
 		}
-
-		getSelectedPage().ifPresent(RecipesOverviewContentPage::loadAndShowRecipes);
 	}
 
 	/**
