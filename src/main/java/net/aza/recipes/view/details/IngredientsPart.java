@@ -12,10 +12,10 @@ import java.util.Collection;
  * Displays a list of ingredients. The amount of ingredients shown is calculated based on the given serving size.
  * This means that the ingredients original amount must be based on a serving size of 1.
  */
-class IngredientsPart extends VerticalLayout {
+public class IngredientsPart extends VerticalLayout {
 	private Collection<Ingredient> ingredients;
 
-	IngredientsPart(final int servingSize, final Collection<Ingredient> list) {
+	public IngredientsPart(final int servingSize, final Collection<Ingredient> list) {
 		ingredients = list;
 		// TODO extract ingredients to separated, updateable components.
 

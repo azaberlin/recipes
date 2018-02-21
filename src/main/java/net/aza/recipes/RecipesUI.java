@@ -43,14 +43,14 @@ public class RecipesUI extends UI implements ViewDisplay {
 	private CssLayout extendableLeftPart;
 	private CssLayout extendableRightPart;
 
-	private boolean TEST_FIRST_UI_CALL = true;
+	private static boolean TEST_FIRST_APP_CALL = true;
 	private HorizontalLayout toolbar;
 
 	@Override
 	protected void init(final VaadinRequest request) {
-		if(TEST_FIRST_UI_CALL) {
+		if(TEST_FIRST_APP_CALL) {
 			createTestData(); // TODO remove
-			TEST_FIRST_UI_CALL= false;
+			TEST_FIRST_APP_CALL = false;
 		}
 
 		uiLayout = initLayout();
@@ -165,7 +165,7 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 				int partsAmount = random.nextInt(5);
 				for (int j = 0; j < partsAmount + 1; j++) {
-					RecipePart recipePart = new RecipePart(recipe, partsAmount > 1 ? "Teil " + (j + 1) : "",
+					RecipePart recipePart = new RecipePart(recipe, partsAmount > 0 ? "Teil " + (j + 1) : "",
 							"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.   \n"
 									+ "\n"
 									+ "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.   \n"
