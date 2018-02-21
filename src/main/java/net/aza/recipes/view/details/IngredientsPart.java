@@ -20,6 +20,7 @@ public class IngredientsPart extends VerticalLayout {
 		// TODO extract ingredients to separated, updateable components.
 
 		setDefaultComponentAlignment(Alignment.TOP_CENTER);
+		setMargin(false);
 
 		updateIngredients(servingSize);
 	}

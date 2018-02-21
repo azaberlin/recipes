@@ -1,10 +1,5 @@
 @import "variables";
 
-@keyframes highlight-definition {
-	from { color: $r-base-color-light; }
-	to { color: inherited; }
-}
-
 .recipes {
 	@include valo;
 
@@ -74,13 +69,77 @@
     	padding-top: 1em;
     }
 
-	.highlight {
-		animation-name: highlight-definition;
-		animation-duration: 4s;
-	}
-
 	.v-window-header .v-icon {
 		margin-right:10px;
 	}
+
+	.expanded {
+		border-top: 1px solid #ddd !important;
+		border-bottom: 1px solid #ddd !important;
+		background-color: #f8f8f8;
+
+		.overview-list-entry-title {
+			margin-top: 1em;
+			.name {
+				font-size: 1.1em;
+				font-weight: bold;
+			}
+
+			.info {
+				color: $r-base-color-light;
+			}
+		}
+
+		.v-progressbar {
+			display:none;
+			transition: display 250ms;
+		}
+
+		.v-progressbar-delayed {
+			display:inline-block;
+		}
+	}
+
+	.overview-list-entry-title .expand-icon {
+		opacity: 0;
+		transition: opacity 250ms;
+	}
+
+	.overview-list-entry-title:hover .expand-icon {
+		opacity: 1;
+	}
+
+	.overview-list-entry {
+		border-top: 0 none transparent;
+		border-bottom: 0 none transparent;
+		transition: border-top 250ms, border-bottom 250ms, background 250ms;
+	}
+
+	.overview-list-entry-title {
+		transition: margin-top 250ms;
+		.name {
+			transition: font-weight 250ms, color 250ms, font-size 250ms;
+		}
+
+		.info {
+			transition: color 250ms;
+		}
+	}
+
+	.main-title .name {
+		font-weight:bold;
+		font-size: 3em;
+	}
+
+	.main-title .name,
+	.main-title .logo .v-icon {
+		background-color: $r-base-color;
+		color: transparent;
+		text-shadow: 0px 2px 3px rgba(255,255,255,0.3) !important;
+		-webkit-background-clip: text;
+		   -moz-background-clip: text;
+				background-clip: text;
+	}
+
 
 }

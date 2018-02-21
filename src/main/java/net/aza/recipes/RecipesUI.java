@@ -40,8 +40,6 @@ public class RecipesUI extends UI implements ViewDisplay {
 
 	private VerticalLayout uiLayout;
 	private View lastView;
-	private CssLayout extendableLeftPart;
-	private CssLayout extendableRightPart;
 
 	private static boolean TEST_FIRST_APP_CALL = true;
 	private HorizontalLayout toolbar;
@@ -98,20 +96,25 @@ public class RecipesUI extends UI implements ViewDisplay {
 	 * @return title
 	 */
 	private Component createTitle(final VerticalLayout uiLayout) {
-		Label title = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() + "&nbsp;&nbsp;&nbsp;mein rezeptbuch&nbsp;&nbsp;" + VaadinIcons.GLASS.getHtml(), ContentMode.HTML);
+		Label title = new Label("mein rezeptbuch");
 		title.addStyleName(ValoTheme.LABEL_H1);
 		title.addStyleName(ValoTheme.LABEL_COLORED);
+		title.addStyleName("name");
 
-		extendableLeftPart = new CssLayout();
-		extendableRightPart = new CssLayout();
+		Label leftIcon = new Label(VaadinIcons.CROSS_CUTLERY.getHtml() , ContentMode.HTML);
+		leftIcon.addStyleName(ValoTheme.LABEL_H1);
+		leftIcon.addStyleName(ValoTheme.LABEL_COLORED);
+		leftIcon.addStyleName("logo");
 
-		extendableLeftPart.setSizeFull();
-		extendableRightPart.setSizeFull();
+		Label rightIcon = new Label(VaadinIcons.GLASS.getHtml(), ContentMode.HTML);
+		rightIcon.addStyleName(ValoTheme.LABEL_H1);
+		rightIcon.addStyleName(ValoTheme.LABEL_COLORED);
+		rightIcon.addStyleName("logo");
 
 		HorizontalLayout titleBar = new HorizontalLayout();
-		titleBar.setDefaultComponentAlignment(Alignment.TOP_CENTER);
-		titleBar.setWidth(100,Unit.PERCENTAGE);
-		titleBar.addComponents(extendableLeftPart, title, extendableRightPart);
+		titleBar.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+		titleBar.addComponents(leftIcon, title, rightIcon);
+		titleBar.addStyleName("main-title");
 
 		uiLayout.addComponents(titleBar);
 

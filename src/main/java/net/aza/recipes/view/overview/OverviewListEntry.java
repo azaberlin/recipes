@@ -10,32 +10,44 @@ import net.aza.recipes.model.RecipePart;
 import net.aza.recipes.view.details.IngredientsPart;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
 class OverviewListEntry extends VerticalLayout {
 
 	private static final String STYLE_EXPANDED = "expanded";
+	private static final String STYLE_COLLAPSED = "collapsed";
 	private final VerticalLayout detailsContainer;
-	private boolean expanded;
 	private final Recipe recipe;
+	private final Label expandCollapseIcon;
+	private boolean expanded;
 
 	OverviewListEntry(Recipe recipe) {
 		this.recipe = recipe;
 		setDefaultComponentAlignment(Alignment.TOP_CENTER);
 		setMargin(false);
 		addStyleName("overview-list-entry");
+		addStyleName(STYLE_COLLAPSED);
 
 		HorizontalLayout entryTitleContainer = new HorizontalLayout();
 		entryTitleContainer.addStyleName("overview-list-entry-title");
+		entryTitleContainer.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+
+		expandCollapseIcon = new Label(VaadinIcons.ANGLE_DOUBLE_DOWN.getHtml(), ContentMode.HTML);
+		expandCollapseIcon.addStyleName("expand-icon");
+		expandCollapseIcon.addStyleName(ValoTheme.LABEL_COLORED);
+		expandCollapseIcon.addStyleName(ValoTheme.LABEL_TINY);
+		entryTitleContainer.addComponent(expandCollapseIcon);
 
 		Label nameLabel = new Label(recipe.getName());
 		nameLabel.addStyleName(ValoTheme.LABEL_COLORED);
+		nameLabel.addStyleName("name");
 		entryTitleContainer.addComponent(nameLabel);
 
 		Label additionalInfoLabel = new Label("Dauer: ca. 20 Minuten, Schwierigkeit: niedrig");
 		additionalInfoLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+		additionalInfoLabel.addStyleName("info");
+		additionalInfoLabel.addStyleName(ValoTheme.LABEL_TINY);
 		entryTitleContainer.addComponent(additionalInfoLabel);
 
 		addComponent(entryTitleContainer);
@@ -59,17 +71,36 @@ class OverviewListEntry extends VerticalLayout {
 		detailsContainer.setMargin(false);
 
 		addComponent(detailsContainer);
+
 	}
 
 	/**
 	 * Shows additional content of this entry.
 	 */
 	private void expand() {
-		addStyleName("expanded");
+		addStyleName(STYLE_EXPANDED);
+		removeStyleName(STYLE_COLLAPSED);
+
+		expandCollapseIcon.setValue(VaadinIcons.ANGLE_DOUBLE_UP.getHtml());
 
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setIndeterminate(true);
 		detailsContainer.addComponent(progressBar);
+
+		Executors.newSingleThreadExecutor().execute(() -> {
+			// showing the progress bar initialiy leads to clipping errors and jumping texts. so
+			// we'll wait a few seconds, to show it.
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} finally {
+				if (progressBar.isAttached()) {
+					getUI().access(() -> progressBar.addStyleName("delayed"));
+				}
+			}
+		});
+
 
 		Executors.newSingleThreadExecutor().execute(() -> {
 			// TODO remove later
@@ -129,7 +160,6 @@ class OverviewListEntry extends VerticalLayout {
 
 					}
 
-
 					detailsContainer.removeComponent(progressBar);
 				});
 			}
@@ -143,6 +173,9 @@ class OverviewListEntry extends VerticalLayout {
 	 */
 	private void collapse() {
 		removeStyleName(STYLE_EXPANDED);
+		addStyleName(STYLE_COLLAPSED);
+
+		expandCollapseIcon.setValue(VaadinIcons.ANGLE_DOUBLE_DOWN.getHtml());
 
 		detailsContainer.setVisible(false);
 		detailsContainer.removeAllComponents();
