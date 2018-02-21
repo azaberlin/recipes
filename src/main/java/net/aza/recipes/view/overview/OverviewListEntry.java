@@ -89,11 +89,11 @@ class OverviewListEntry extends VerticalLayout {
 
 		Executors.newSingleThreadExecutor().execute(() -> {
 			// showing the progress bar initialiy leads to clipping errors and jumping texts. so
-			// we'll wait a few seconds, to show it.
+			// we'll wait a few "seconds", to show it.
 			try {
-				Thread.sleep(500);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			} finally {
 				if (progressBar.isAttached()) {
 					getUI().access(() -> progressBar.addStyleName("delayed"));
@@ -106,7 +106,7 @@ class OverviewListEntry extends VerticalLayout {
 			// TODO remove later
 			// just to show the progress bar
 			try {
-				Thread.sleep(250);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} finally {
