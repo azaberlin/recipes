@@ -29,11 +29,10 @@ class OverviewList extends Panel {
 
 		list = new VerticalLayout();
 		list.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+		list.addStyleName("recipes-content-list");
 
-		setContent(list);
 		setSizeFull();
 		addStyleName("recipes-overview-content-page");
-		addStyleName("recipes-content-list");
 	}
 
 	public String getCategory() {
@@ -48,20 +47,23 @@ class OverviewList extends Panel {
 	}
 
 	/**
-	 * Load this category's recipes from repository and show them on this page.
-	 * Use {@link #clearPage()} before if you want to have a clean page.
+	 * (Re-) Load this category's recipes from repository and show them on this page.
 	 */
 	public void loadAndShowRecipes() {
+		clearPage();
+
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setIndeterminate(true);
-		list.addComponent(progressBar);
+		setContent(progressBar);
 
 		Executors.newSingleThreadExecutor().submit(() -> {
-			List<Recipe> list = loadRecipesFromRepository();
+			List<Recipe> recipes = loadRecipesFromRepository();
 
 			getUI().access(() -> {
-				addRecipes(list);
-				progressBar.setVisible(false);
+				recipes.forEach(recipe -> {
+					list.addComponent(new OverviewListEntry(recipe));
+				});
+				setContent(list);
 			});
 		});
 	}
@@ -75,52 +77,4 @@ class OverviewList extends Panel {
 		return this.repository.findAllByNameLike(this.category + "%");
 	}
 
-	/**
-	 * Adds the given recipe list to the page. Use {@link #clearPage()} if you want to clear the page
-	 * before.
-	 *
-	 * @param recipes - recipes to add.
-	 */
-	private void addRecipes(final List<Recipe> recipes) {
-		recipes.forEach(recipe -> {
-			list.addComponent(new OverviewListEntry(recipe));
-		});
-	}
-
-//	private void addRecipes(final List<Recipe> list) {
-//		list.forEach(recipe -> {
-//
-//			HorizontalLayout titleLayout = new HorizontalLayout();
-//			titleLayout.addStyleName("title-bar");
-//
-//			Label recipeTitle = new Label(recipe.getName());
-//			recipeTitle.addStyleName(ValoTheme.LABEL_H2);
-//			recipeTitle.addStyleName(ValoTheme.LABEL_COLORED);
-//
-//			titleLayout.addComponent(recipeTitle);
-//
-//			String uriFragment = URIFragmentBuilder.of(recipe).getFragment();
-//
-//			Link showRecipeDetails = new Link();
-//			showRecipeDetails.setIcon(VaadinIcons.ANGLE_RIGHT);
-//			showRecipeDetails.setResource(new ExternalResource(DetailsView.VIEW_NAME + uriFragment));
-//			showRecipeDetails.setTargetName("_blank");
-//			showRecipeDetails.setDescription("Rezept öffnen");
-//			showRecipeDetails.addStyleName(ValoTheme.LABEL_H2);
-//
-//			titleLayout.addComponent(showRecipeDetails);
-//			titleLayout.setComponentAlignment(showRecipeDetails, Alignment.MIDDLE_LEFT);
-//
-//			list.addComponent(titleLayout);
-//
-//			String description = recipe.getDescription();
-//			int length = description.length();
-//			Label receiptDescription = new Label(
-//					length > 300 ? description.substring(0, 300) + "..." : description);
-//			receiptDescription.setWidth(50, Unit.PERCENTAGE);
-//
-//			list.addComponent(receiptDescription);
-//
-//		});
-//	}
 }

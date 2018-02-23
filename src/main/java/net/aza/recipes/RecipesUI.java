@@ -85,6 +85,7 @@ public class RecipesUI extends UI implements ViewDisplay {
 	private VerticalLayout initLayout() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+		layout.setSpacing(false);
 		layout.addStyleName("recipes-ui");
 		return layout;
 	}

@@ -1,15 +1,15 @@
 package net.aza.recipes.view.overview;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.*;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.themes.ValoTheme;
 import net.aza.recipes.repositories.RecipeRepository;
+import net.aza.recipes.view.edit.Editor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 public class OverviewView extends CustomComponent implements View {
 
 	static final String VIEW_NAME = "";
+	public static final String LAST_SELECTED_CATEGORY = "last_category";
 
 	@Autowired
 	private RecipeRepository repository;
@@ -37,12 +38,27 @@ public class OverviewView extends CustomComponent implements View {
 
 	@PostConstruct
 	private void init() {
+		addStyleName("recipes-overview");
+
+		VerticalLayout container = new VerticalLayout();
+		container.setMargin(false);
+		container.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+
+		Button newButton = new Button("Neues Rezept hinzufügen", VaadinIcons.PLUS);
+		newButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+		newButton.addStyleName(ValoTheme.BUTTON_TINY);
+		newButton.addClickListener(event -> getUI().addWindow(new Editor(repository)));
+		container.addComponent(newButton);
+
 		this.sheet = new TabSheet();
 		this.sheet.addStyleName(ValoTheme.TABSHEET_CENTERED_TABS);
 		this.sheet.addStyleName("recipe-navigation");
 		this.sheet.setSizeFull();
+		container.addComponentsAndExpand(this.sheet);
 
-		setCompositionRoot(this.sheet);
+		container.setSizeFull();
+
+		setCompositionRoot(container);
 	}
 
 	@Override
@@ -54,23 +70,38 @@ public class OverviewView extends CustomComponent implements View {
 		filteredStream.forEach(value -> this.sheet.addTab(new OverviewList(value, this.repository), value));
 
 		this.sheet.addSelectedTabChangeListener(tabEvent -> {
-			if (this.selectedPage != null) {
-				this.selectedPage.clearPage();
-			}
+			OverviewList page = updateInternalsOnTabSwitchEvent(tabEvent);
 
-			OverviewList page = (OverviewList) tabEvent.getTabSheet().getSelectedTab();
-			this.selectedPage = page;
-
-			// store category for returning to this page
-			getSession().setAttribute("last_category", page.getCategory());
+			storeSelectedTabInSession(page);
 
 			page.loadAndShowRecipes();
 		});
 
 		// try to restore last selected tab if returning to this page
 		// (not needed in current implementation)
-		// restoreLastSelectedTabIfPresent();
+		// restoreLastSelectedTabFromSessionIfPresent();
 
+		reloadCurrentPage();
+	}
+
+	private OverviewList updateInternalsOnTabSwitchEvent(TabSheet.SelectedTabChangeEvent tabEvent) {
+		if (this.selectedPage != null) {
+			this.selectedPage.clearPage();
+		}
+
+		OverviewList page = (OverviewList) tabEvent.getTabSheet().getSelectedTab();
+		this.selectedPage = page;
+		return page;
+	}
+
+	private void storeSelectedTabInSession(OverviewList page) {
+		getSession().setAttribute(LAST_SELECTED_CATEGORY, page.getCategory());
+	}
+
+	/**
+	 * If there is a currently selected page, then do a reload.
+	 */
+	private void reloadCurrentPage() {
 		getSelectedPage().ifPresent(OverviewList::loadAndShowRecipes);
 	}
 
@@ -78,8 +109,8 @@ public class OverviewView extends CustomComponent implements View {
 	 * Tries to restore the last selected tab. This function is usefull when all pages are opened in
 	 * one page (currently not implemented).
 	 */
-	private void restoreLastSelectedTabIfPresent() {
-		String lastCategory = (String) getSession().getAttribute("last_category");
+	private void restoreLastSelectedTabFromSessionIfPresent() {
+		String lastCategory = (String) getSession().getAttribute(LAST_SELECTED_CATEGORY);
 		if (lastCategory != null) {
 			Iterator<Component> iterator = this.sheet.iterator();
 			while (iterator.hasNext()) {
@@ -97,11 +128,6 @@ public class OverviewView extends CustomComponent implements View {
 	 * @return currently selected page
 	 */
 	private Optional<OverviewList> getSelectedPage() {
-		Tab tab = this.sheet.getTab(0);
-		if (tab != null) {
-			return Optional.of((OverviewList) tab.getComponent());
-		}
-
-		return Optional.empty();
+		return Optional.ofNullable((OverviewList) this.sheet.getSelectedTab());
 	}
 }

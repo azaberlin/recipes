@@ -141,5 +141,11 @@
 				background-clip: text;
 	}
 
-
+	.v-label-separator hr {
+		margin: 0;
+		height: 1px;
+		border: 0;
+        border-bottom: 1px dashed $r-base-color-light;
+        background: #fff;
+	}
 }
